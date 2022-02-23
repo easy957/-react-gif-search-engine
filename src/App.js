@@ -1,23 +1,52 @@
-import logo from './logo.svg';
-import './App.css';
+import axios from 'axios';
+import GifModal from 'components/GifModal';
+import GifsList from 'components/GifsList';
+import SearchBar from 'components/SearchBar';
+import { useState } from 'react';
+
+const API_KEY = 'vKavkRdguuXeCYntO8nrouCa5TTXK3jl';
+
+axios.defaults.baseURL = `https://api.giphy.com/v1/gifs/search?api_key=${API_KEY}&limit=5`;
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 function App() {
+  const [gifs, setGifs] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentSelectedGif, setCurrentSelectedGif] = useState(null);
+
+  const handleQueryChange = async query => {
+    if (query === '') {
+      return;
+    }
+    try {
+      const { data } = await axios.get('', {
+        params: { q: query },
+      });
+      setGifs(data.data);
+    } catch (error) {}
+  };
+
+  const openModal = gif => {
+    setIsModalOpen(true);
+    setCurrentSelectedGif(gif);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setCurrentSelectedGif(null);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <SearchBar onQueryChange={handleQueryChange} />
+      <GifsList gifs={gifs} onGifSelect={openModal} />
+      {isModalOpen && (
+        <GifModal
+          isModalOpen={isModalOpen}
+          onRequestClose={closeModal}
+          selectedGif={currentSelectedGif}
+        />
+      )}
     </div>
   );
 }
