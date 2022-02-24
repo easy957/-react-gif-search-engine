@@ -2,6 +2,7 @@ import axios from 'axios';
 import GifModal from 'components/GifModal';
 import GifsList from 'components/GifsList';
 import SearchBar from 'components/SearchBar';
+import debounce from 'lodash.debounce';
 import { useState } from 'react';
 
 const API_KEY = 'vKavkRdguuXeCYntO8nrouCa5TTXK3jl';
@@ -14,7 +15,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentSelectedGif, setCurrentSelectedGif] = useState(null);
 
-  const handleQueryChange = async query => {
+  const fetchGifs = async query => {
     if (query === '') {
       return;
     }
@@ -38,7 +39,7 @@ function App() {
 
   return (
     <div className="app">
-      <SearchBar onQueryChange={handleQueryChange} />
+      <SearchBar onQueryChange={debounce(fetchGifs, 500)} />
       <GifsList gifs={gifs} onGifSelect={openModal} />
       {isModalOpen && (
         <GifModal
